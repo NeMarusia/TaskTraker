@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 def init_db() -> None:
     with sqlite3.connect('tasks.db') as conn:
@@ -10,19 +11,21 @@ def init_db() -> None:
                 title TEXT NOT NULL,
                 description TEXT,
                 due_date TEXT,
-                priority INTEGER
+                priority INTEGER,
+                created_at TEXT
             )
             '''
         )
         conn.commit()
 
 def add_task_to_db(title, description, due_date, priority):
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with sqlite3.connect('tasks.db') as conn:
         cursor = conn.cursor()
         cursor.execute(
             '''
-            INSERT INTO tasks (title, description, due_date, priority) VALUES (?, ?, ?, ?)
-            ''', (title, description, due_date, priority)
+            INSERT INTO tasks (title, description, due_date, priority, created_at) VALUES (?, ?, ?, ?, ?)
+            ''', (title, description, due_date, priority, created_at)
         )
         conn.commit()
 
@@ -50,11 +53,3 @@ def delete_task_from_db(task_id):
         cursor = conn.cursor()
         cursor.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
         conn.commit()
-
-# Реализация функции для получения подробностей задачи
-def get_task_details_from_db(task_id):
-    with sqlite3.connect('tasks.db') as conn:
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, title, description, due_date, priority FROM tasks WHERE id = ?', (task_id,))
-        task_details = cursor.fetchone()
-    return task_details
